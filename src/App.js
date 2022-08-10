@@ -1,80 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { BASE_URL } from "./constants/index";
-import axios from "axios";
+import { fetchData } from "./utils/fetchData";
+import { extractNames } from "./utils/extractNames";
 
 function App() {
-  let locationResults = [];
-  let episodeResults = [];
-  let characterResults = [];
-
-  const fetchData = async (resource) => {
-    let currentPage = 1;
-    let lastPage = null;
-    let results = [];
-
-    let END_POINT = `${BASE_URL}/${resource}?page=${currentPage}`;
-
-    // get number of pages for specified resource (location, episode or character)
-    // and push first page data into results array
-    try {
-      const response = await axios.get(END_POINT);
-
-      lastPage = response.data.info.pages;
-      results.push(response.data.results);
-      currentPage += 1;
-    } catch (err) {
-      console.log(err);
-    }
-
-    while (currentPage <= lastPage) {
-      END_POINT = `${BASE_URL}/${resource}?page=${currentPage}`;
-
-      try {
-        const response = await axios.get(END_POINT);
-
-        results.push(response.data.results);
-        currentPage += 1;
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    // return flat array for better manipulation
-    return results.flat();
-  };
-
-  const handleExecute = async (e) => {
+  const handleCharCount = async (e) => {
     e.preventDefault();
+
+    const startTime = performance.now();
 
     let locationData = await fetchData("location");
     let locationNames = extractNames(locationData);
     let locationCharCounter = countLetter(locationNames, "l");
-    console.log(
-      "Location - L (case insensitive) char count:",
-      locationCharCounter
-    );
-
     let episodeData = await fetchData("episode");
     let episodeNames = extractNames(episodeData);
     let episodeCharCounter = countLetter(episodeNames, "e");
-    console.log(
-      "Episode - E (case insensitive) char count:",
-      episodeCharCounter
-    );
-
     let characterData = await fetchData("character");
     let characterNames = extractNames(characterData);
     let characterCharCounter = countLetter(characterNames, "c");
-    console.log(
-      "Character - C (case insensitive) char count:",
-      locationCharCounter
-    );
-  };
+    const endTime = performance.now();
 
-  const extractNames = (array) => {
-    return array.map((item) => {
-      return item.name;
-    });
+    const executionTime = endTime - startTime;
+
+    console.log("Location char count:", locationCharCounter);
+    console.log("Episode char count:", episodeCharCounter);
+    console.log("Character char count:", characterCharCounter);
+    console.log("tardó", executionTime, "milisegundos");
   };
 
   const countLetter = (array, letter) => {
@@ -97,7 +47,7 @@ function App() {
   return (
     <>
       <form>
-        <button onClick={handleExecute}>Execute Location CharCounter</button>
+        <button onClick={handleCharCount}>Execute CharCounter</button>
         <button onClick={handleConsoleLog}>Console Log</button>
       </form>
       <p></p>
