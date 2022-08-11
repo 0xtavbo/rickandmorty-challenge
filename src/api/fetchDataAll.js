@@ -1,7 +1,7 @@
 import { BASE_URL } from "../constants/index";
 import axios from "axios";
 
-export const fetchData = async (resource) => {
+export const fetchDataAll = async (resource) => {
   let currentPage = 1;
   let lastPage = null;
   let results = [];
