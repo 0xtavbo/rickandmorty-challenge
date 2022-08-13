@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchDataAll } from "./api/fetchDataAll";
+import { fetchCharacter } from "./api/fetchCharacter";
 import { extractNames } from "./utils/extractNames";
 import { countLetter } from "./utils/countLetter";
-import { fetchCharacter } from "./api/fetchCharacter";
+import {
+  createOutputCharCount,
+  createOutputEpisodeLocation,
+} from "./utils/generateOutput";
 
 function App() {
-  const resultRef = useRef();
+  const outputArray = [];
 
   const handleCharCount = async (e) => {
     e.preventDefault();
@@ -27,10 +31,14 @@ function App() {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.log("Location char count:", locationCharCounter);
-    console.log("Episode char count:", episodeCharCounter);
-    console.log("Character char count:", characterCharCounter);
-    console.log("tardó", executionTime, "milisegundos");
+    const charCountOutput = createOutputCharCount(
+      executionTime,
+      locationCharCounter,
+      episodeCharCounter,
+      characterCharCounter
+    );
+
+    outputArray.push(charCountOutput);
   };
 
   const handleEpisodeLocations = async (e) => {
@@ -46,27 +54,30 @@ function App() {
       const charactersData = episode.characters.map((character) =>
         fetchCharacter(character)
       );
+      const response = await Promise.all(charactersData);
 
-      const res = await Promise.all(charactersData);
-
-      const originsArray = res.map((character) => {
+      const originsArray = response.map((character) => {
         return character.data.origin.name;
       });
 
-      let episodeJSON = {
+      let episodeResult = {
         name: episode.name,
         episode: episode.episode,
         locations: [...new Set(originsArray)],
       };
 
-      results[index] = episodeJSON;
+      results[index] = episodeResult;
     });
 
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.log("results", results);
-    console.log("tardó", executionTime, "milisegundos");
+    const episodeLocationOutput = createOutputEpisodeLocation(
+      executionTime,
+      results
+    );
+
+    outputArray.push(episodeLocationOutput);
   };
 
   return (
@@ -76,9 +87,15 @@ function App() {
         <button onClick={handleEpisodeLocations}>
           Execute Episode Locations
         </button>
-        <p ref={resultRef}></p>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            console.log(outputArray);
+          }}
+        >
+          Show output
+        </button>
       </form>
-      <p></p>
     </>
   );
 }

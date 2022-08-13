@@ -3,30 +3,17 @@ import axios from "axios";
 
 export const fetchDataAll = async (resource) => {
   let currentPage = 1;
-  let lastPage = null;
+  let lastPage = 1;
   let results = [];
 
-  let END_POINT = `${BASE_URL}/${resource}?page=${currentPage}`;
-
-  // get number of pages for specified resource (location, episode or character)
-  // and push first page data into results array
-  try {
-    const response = await axios.get(END_POINT);
-
-    lastPage = response.data.info.pages;
-    results.push(response.data.results);
-    currentPage += 1;
-  } catch (err) {
-    console.log(err);
-  }
-
   while (currentPage <= lastPage) {
-    END_POINT = `${BASE_URL}/${resource}?page=${currentPage}`;
+    let END_POINT = `${BASE_URL}/${resource}?page=${currentPage}`;
 
     try {
       const response = await axios.get(END_POINT);
 
       results.push(response.data.results);
+      lastPage = response.data.info.pages;
       currentPage += 1;
     } catch (err) {
       console.log(err);
