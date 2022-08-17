@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { fetchDataAll } from "./api/fetchDataAll";
 import { fetchCharacter } from "./api/fetchCharacter";
 import { extractNames } from "./utils/extractNames";
